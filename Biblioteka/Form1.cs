@@ -180,10 +180,10 @@ namespace Biblioteka
             {
                 connection.Open();
                 string selectSql = @" SELECT 
-                                     Books.Name_Book as 'Название книги',   
-                                     Books.Name_Autor as 'Автор',
-                                        Books.Num_Str as 'Страниц',
-                                        Cataloge.Name_Cat as 'Раздел'
+                                         Books.Name_Book as 'Название книги',   
+                                         Books.Name_Autor as 'Автор',
+                                         Books.Num_Str as 'Страниц',
+                                         Cataloge.Name_Cat as 'Раздел'
                                     FROM Books, Cataloge
                                     WHERE Cataloge.ID_Cat = Books.ID_Class";
 
@@ -250,7 +250,7 @@ namespace Biblioteka
             //кнопка добавить
             But_ADD.Location = new Point(355, 371);
             But_ADD.Name = "Add";
-            But_ADD.Size = new Size(95, 121);
+            But_ADD.Size = new Size(123, 126);
             But_ADD.TabIndex = 0;
             But_ADD.Image = Image.FromFile("button/ADD.png");
             But_ADD.BackColor = Color.Transparent;
@@ -573,32 +573,42 @@ namespace Biblioteka
 
             But_ADDBook.Click += (sender, e) =>
             {
-                if (string.IsNullOrWhiteSpace(addClass.Text) ||
-                    string.IsNullOrWhiteSpace(nameBook.Text) ||
-                    string.IsNullOrWhiteSpace(nameAutor.Text) ||
-                    string.IsNullOrWhiteSpace(numStr.Text))
+                try
                 {
-                    MessageBox.Show("Все поля должны быть заполнены!");
-                    return;
-                }
+                    if (string.IsNullOrWhiteSpace(addClass.Text) ||
+                        string.IsNullOrWhiteSpace(nameBook.Text) ||
+                        string.IsNullOrWhiteSpace(nameAutor.Text) ||
+                        string.IsNullOrWhiteSpace(numStr.Text))
+                    {
+                        var msgError = new MsgBoxError("Все поля должны быть заполнены!", "Ввод книги");
+                        msgError.ShowDialog();
+                        return;
+                    }
 
-                // Преобразуем количество страниц в число
-                if (!int.TryParse(numStr.Text, out int str))
+                    // Преобразуем количество страниц в число
+                    if (!int.TryParse(numStr.Text, out int str))
+                    {
+                        var msgError = new MsgBoxError("Количество страниц должно быть числом!", "Ввод книги");
+                        msgError.ShowDialog();
+                        return;
+                    }
+
+                    string cataloge = addClass.Text;
+                    int id_Cat = ValidateIdToCataloge(cataloge);
+
+                    string book = nameBook.Text;
+                    string autor = nameAutor.Text;
+
+                    ADDData(id_Cat, book, autor, str);
+
+                    var msgOK = new MsgBoxOk("Книга успешно добавлена!", "Ввод книги");
+                    msgOK.ShowDialog();
+                }
+                catch (Exception ex)
                 {
-                    MessageBox.Show("Количество страниц должно быть числом!");
-                    return;
+                    MessageBox.Show("Произошла системная ошибка при добавлении книги: Данного раздела нет в базе данных");
+
                 }
-
-                string cataloge = addClass.Text;
-                int id_Cat = ValidateIdToCataloge(cataloge);
-
-                string book = nameBook.Text;
-                string autor = nameAutor.Text;
-
-                ADDData(id_Cat, book, autor, str);
-
-                // Опционально: сообщение об успешном добавлении
-                MessageBox.Show("Книга успешно добавлена!");
             };
 
             // кнопка НАЗАД
@@ -654,7 +664,7 @@ namespace Biblioteka
             But_ReturnCat.Enabled = isOn;
             But_ReturnCat.Visible = isOn;
             But_ExitCat.Enabled = isOn;
-            But_ReturnCat.Visible = isOn;
+            But_ExitCat.Visible = isOn;
         }
 
         private void Cataloge()
